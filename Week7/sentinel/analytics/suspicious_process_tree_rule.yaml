@@ -1,0 +1,25 @@
+id: suspicious-process-tree-v1
+name: Suspicious Process Tree – Office spawning PowerShell
+description: Detects Office applications spawning PowerShell or script interpreters with suspicious flags.
+severity: Medium
+tactics:
+  - Execution
+techniques:
+  - T1059.001
+queryFrequency: 5m
+queryPeriod: 10m
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: User
+  - entityType: Host
+    fieldMappings:
+      - identifier: FullName
+        columnName: Computer
+query: |
+  SysmonEvent
+  | where EventID == 1
+  | where ParentImage has_any ("winword.exe","excel.exe","outlook.exe")
+  | where Image has_any ("powershell.exe","cmd.exe","wscript.exe")
+  | where CommandLine has_any ("-enc","EncodedCommand","IEX","DownloadString")
